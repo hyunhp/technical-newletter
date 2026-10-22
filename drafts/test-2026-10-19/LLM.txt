@@ -1,0 +1,56 @@
+﻿Start Your Week Informed — Explore 3 Key Papers Driving the Future of LLMs and Generative AI!
+
+On CPUs, speculative decoding loses speed to bookkeeping. One runtime claims 1.35× over llama.cpp by cutting it.
+Stay ahead with insights that matter.
+
+(1) Accelerating CPU Speculative Decoding via Unified Graph Execution and Transactional KV Isolation
+(2) Learning Checklists to Reduce Lottery Effects in Scientific Peer Review
+(3) Beyond source attribution: Address authorship and comparability decisions in an LLM -built scholarly knowledge graph
+
+#LLMResearch #GenAI #AIInnovation #ResearchDigest #WeeklyUpdate
+
+-----------------------------------
+
+📰 LLM Research Weekly Papers | 4th Week of October 2026
+Top Papers in Large Language Models (12 October - 18 October)
+
+Speculative decoding is meant to be a free speedup. On a CPU, much of that speedup goes to housekeeping: switching between the draft and target models, and allocating memory every time rejected tokens are rolled back out of the KV cache.
+
+🔎 What happened
+SubTernary is a CPU execution framework aimed at that overhead. It compiles the draft and target models into one memory arena served by a persistent thread pool, so there's no context swap between two graphs. Speculative tokens go to a static scratchpad. Rolling one back is a zero-copy pointer reset, with no reallocation and no thread synchronization, and the authors report O(1) rollback latency. A 256-bit AVX2 ternary SIMD kernel is included as a low-bit case study. Headline numbers: 1.35× faster than llama.cpp's speculative decoding and 3.99× faster than plain autoregressive decoding. The ablation is the interesting part. The systems runtime drives 35.0% of the throughput gains and the ternary kernel adds only 6.0%. Most of the win comes from memory and scheduling discipline, not clever math.
+
+🛠 Why it matters
+If you ship local or on-prem inference on CPUs, such as laptops, edge boxes or cheap servers without GPUs, this says the runtime may be leaving speed on the table even when you already use speculative decoding in llama.cpp. You don't need exotic low-bit kernels to get most of it. Pre-allocated arenas, persistent threads and cheap KV rollback did most of the work. Benchmark your own stack on rollback cost and draft/target switching before you buy hardware or chase quantization formats.
+
+🌱 In plain words
+Picture a head chef and an apprentice sharing a kitchen. The apprentice preps dishes quickly and the chef approves or bins them. In the old setup they swap workstations for every dish, and each rejected dish means scrubbing and re-laying the counter. SubTernary gives them one shared counter and a tray for drafts. A rejected dish just gets tipped off the tray. The cooking itself stays the same. The time spent shuffling around disappears.
+
+⚠️ Reality check
+The abstract doesn't name the models, the CPUs, draft acceptance rates or batch sizes, and all of these change how much speculative decoding helps. Everything also rests on AVX2, so it's unclear whether the gains carry over to ARM or Apple silicon.
+
+💭 Editor's Take
+The number that matters is the 1.35× over llama.cpp, not the 3.99× over autoregressive decoding. And the real lesson is that runtime plumbing beats low-bit kernels: 35.0% of the gains versus 6.0%. I'd treat ternary as a sideshow here. I'll believe the plumbing story is general once someone shows it holding across several draft/target pairs and at least one non-x86 CPU. If the ideas get merged into llama.cpp itself, that settles it.
+
+**(1) Accelerating CPU Speculative Decoding via Unified Graph Execution and Transactional KV Isolation** – Lead paper: a CPU runtime (unified graph caching plus transactional KV isolation) that cuts speculative decoding overhead and reports 1.35× over llama.cpp speculative decoding and 3.99× over autoregressive decoding.
+
+Read More : https://arxiv.org/abs/2610.28671
+
+**(2) Learning Checklists to Reduce Lottery Effects in Scientific Peer Review** – Also notable: learns checklists from historical reviews to reduce 'reviewer lottery' error in scientific peer review.
+
+Read More : https://arxiv.org/abs/2610.28666
+
+**(3) Beyond source attribution: Address authorship and comparability decisions in an LLM -built scholarly knowledge graph** – Also notable: looks at how LLM-built knowledge graphs can quietly turn a retrieval address into the only classification, using Sinitic dialects as the case.
+
+Read More : https://arxiv.org/abs/2610.28663
+
+🔖 If this newsletter helps your learning, you may like cert-bank too: free AWS and Palantir certification practice with explanations. https://hyunhp.github.io/cert-bank/
+
+That’s all for this week’s edition of LLM Research Weekly!
+I hope you found these insights meaningful and relevant to your work or curiosity in the field. Join me again next week for a new roundup of the latest developments in LLM and generative AI research.
+
+Your thoughts and feedback are always appreciated.
+
+Best regards,
+Hyunho
+
+===================================
