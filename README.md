@@ -29,7 +29,7 @@ python commands.py --query LLM --date-from 2026-09-28 --date-to 2026-10-04 --cur
 2. **API**: 구독이 없거나 실패하면 `ANTHROPIC_API_KEY` 사용.
 3. **기존 방식**: 둘 다 없으면 키워드 선정으로 전환 (`weekly_newsletter.py`는 `llm` 열을 직접 채운 뒤 실행).
 
-실행 도중 한 방식이 실패하면 다음 방식으로 이어서 진행합니다.
+실행 도중 한 방식이 실패하면 다음 방식으로 이어서 진행합니다. `claude`가 PATH에 없으면 `CLAUDE_BIN=<claude 실행 파일 경로>`로 지정하세요. Windows에서는 네이티브 설치(`claude.exe`)를 권장하며, npm 설치(`claude.cmd`)도 동작하도록 인자를 단순화해 두었습니다.
 
 ### 자주 쓰는 옵션 (`curated_newsletter.py`)
 
@@ -45,7 +45,7 @@ python commands.py --query LLM --date-from 2026-09-28 --date-to 2026-10-04 --cur
 
 ### 템플릿
 
-문구(제목, 해시태그, 캡션 인트로, `take_label`, 독자·관점 설명)는 `newsletter_template.json`의 `curated` 블록에서 수정합니다.
+문구(제목, 해시태그, 캡션 인트로, `take_label`, 독자·관점 설명)는 `newsletter_template.json`의 `curated` 블록에서 수정합니다. 본문 끝(꼬리말 바로 위)에는 `curated_footers`의 문구가 주차마다 돌아가며 한 줄 들어갑니다(API 불필요, 비우면 푸터 없음).
 
 ## 기존 방식
 

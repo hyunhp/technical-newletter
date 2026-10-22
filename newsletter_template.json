@@ -30,5 +30,11 @@
       "audience": "Engineers, product builders and newcomers who use LLMs and want to know which research changes what they should build or expect, without reading every paper.",
       "angle": "The volume of LLM papers is overwhelming, so the value is direction: which way the field is moving, what is now cheaper, more reliable or newly possible, and which claims depend on benchmarks that may not transfer to real products."
     }
-  }
+  },
+  "curated_footers": [
+    "🔖 Studying for AWS or Palantir certifications? Free practice questions with detailed explanations: https://hyunhp.github.io/cert-bank/ (free to use, support is optional)",
+    "🔖 Side project: cert-bank, free and original practice questions plus a day-by-day study guide for AWS and Palantir certifications. https://hyunhp.github.io/cert-bank/",
+    "🔖 Preparing for a cloud certification? cert-bank has free practice questions with explanations for AWS and Palantir exams: https://hyunhp.github.io/cert-bank/ (support is optional)",
+    "🔖 If this newsletter helps your learning, you may like cert-bank too: free AWS and Palantir certification practice with explanations. https://hyunhp.github.io/cert-bank/"
+  ]
 }

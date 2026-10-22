@@ -13,6 +13,10 @@ import pandas as pd
 from utils.get_week_of_month import get_week_of_month, ordinal_number
 from utils.rank_parser import rank_papers
 
+for stream in (sys.stdout, sys.stderr):
+    if hasattr(stream, 'reconfigure'):
+        stream.reconfigure(errors='replace')
+
 parser = argparse.ArgumentParser(description="Build a themed weekly newsletter (one thread, 2-3 papers, written take)")
 parser.add_argument('--query', type=str, default='Quantum Computing', help='Quantum Computing | LLM')
 parser.add_argument('--input-file', type=str, required=True, help='Crawled CSV under <Query>/crawling (e.g. 20250105_20250111.csv)')
@@ -61,8 +65,17 @@ def subscription_env():
     return {k: v for k, v in os.environ.items() if k not in ('ANTHROPIC_API_KEY', 'ANTHROPIC_AUTH_TOKEN')}
 
 
+def claude_path():
+    return os.environ.get('CLAUDE_BIN') or shutil.which('claude')
+
+
+def is_cmd_shim(path):
+    # Windows npm installs expose claude.cmd; cmd.exe mangles quotes and newlines in arguments
+    return path.lower().endswith(('.cmd', '.bat'))
+
+
 def subscription_available():
-    claude = shutil.which('claude')
+    claude = claude_path()
     if not claude:
         return False
     try:
@@ -73,13 +86,50 @@ def subscription_available():
     return status.get('loggedIn') is True and 'api' not in str(status.get('authMethod', '')).lower()
 
 
+def extract_json(text):
+    text = text.strip()
+    try:
+        return json.loads(text)
+    except json.JSONDecodeError:
+        return json.loads(text[text.index('{'):text.rindex('}') + 1])
+
+
+def validate(value, schema, path='$'):
+    kind = schema.get('type')
+    if kind == 'object':
+        if not isinstance(value, dict):
+            raise ValueError(f'{path} is not an object')
+        for key in schema.get('required', []):
+            if key not in value:
+                raise ValueError(f'{path}.{key} is missing')
+        for key, sub in schema.get('properties', {}).items():
+            validate(value[key], sub, f'{path}.{key}')
+    elif kind == 'array':
+        if not isinstance(value, list):
+            raise ValueError(f'{path} is not a list')
+        for i, item in enumerate(value):
+            validate(item, schema['items'], f'{path}[{i}]')
+    elif kind == 'string' and not isinstance(value, str):
+        raise ValueError(f'{path} is not a string')
+    elif kind == 'integer' and (not isinstance(value, int) or isinstance(value, bool)):
+        raise ValueError(f'{path} is not an integer')
+    elif kind == 'boolean' and not isinstance(value, bool):
+        raise ValueError(f'{path} is not a boolean')
+
+
 def ask_subscription(model, system, user, schema, effort):
-    # Run from an empty directory so no project CLAUDE.md is picked up; the prompt goes through stdin (Windows arg-length limit)
+    claude = claude_path()
+    cmd = [claude, '-p', '--model', model, '--effort', effort, '--output-format', 'json', '--tools', '', '--no-session-persistence']
+    prompt = user
+    if is_cmd_shim(claude):
+        # Keep every argument trivial: the system prompt and the schema travel through stdin instead
+        prompt = f'{system}\n\n{user}\n\nReply with one JSON object that matches this JSON Schema and nothing else:\n{json.dumps(schema)}'
+    else:
+        cmd += ['--json-schema', json.dumps(schema), '--system-prompt', system]
+    # Run from an empty directory so no project CLAUDE.md is picked up; the prompt goes through stdin (argument length limits)
     with tempfile.TemporaryDirectory() as cwd:
-        r = subprocess.run(
-            [shutil.which('claude'), '-p', '--model', model, '--effort', effort, '--output-format', 'json',
-             '--json-schema', json.dumps(schema), '--tools', '', '--no-session-persistence', '--system-prompt', system],
-            input=user, capture_output=True, text=True, encoding='utf-8', timeout=900, env=subscription_env(), cwd=cwd)
+        r = subprocess.run(cmd, input=prompt, capture_output=True, text=True, encoding='utf-8', timeout=900,
+                           env=subscription_env(), cwd=cwd)
     try:
         data = json.loads(r.stdout)
     except json.JSONDecodeError:
@@ -89,11 +139,14 @@ def ask_subscription(model, system, user, schema, effort):
     usage = data.get('usage', {})
     for key in ('input_tokens', 'output_tokens'):
         usage_total[(model, key)] = usage_total.get((model, key), 0) + usage.get(key, 0)
-    return data['structured_output'] if data.get('structured_output') is not None else json.loads(data['result'])
+    return data['structured_output'] if data.get('structured_output') is not None else extract_json(data['result'])
 
 
 def ask_api(model, system, user, schema, effort):
-    import anthropic   # imported lazily so subscription-only users do not need the package
+    try:
+        import anthropic   # imported lazily so subscription-only users do not need the package
+    except ImportError:
+        raise RuntimeError('the anthropic package is not installed (pip install anthropic)')
     response = anthropic.Anthropic().messages.create(
         model=model,
         max_tokens=16000,
@@ -120,14 +173,17 @@ def detect_backends():
 def ask_json(model, system, user, schema, effort):
     while BACKENDS:
         name = BACKENDS[0]
-        try:
-            ask = ask_subscription if name == 'subscription' else ask_api
-            return ask(model, system, user, schema, effort)
-        except Exception as e:
-            print(f'  [{name}] failed: {e}')
-            BACKENDS.pop(0)
-            if BACKENDS:
-                print(f'  switching to [{BACKENDS[0]}]')
+        ask = ask_subscription if name == 'subscription' else ask_api
+        for attempt in (1, 2):
+            try:
+                result = ask(model, system, user, schema, effort)
+                validate(result, schema)
+                return result
+            except Exception as e:
+                print(f'  [{name}] attempt {attempt} failed: {e}')
+        BACKENDS.pop(0)
+        if BACKENDS:
+            print(f'  switching to [{BACKENDS[0]}]')
     raise NoBackend('no working Claude backend')
 
 
@@ -250,7 +306,7 @@ def write_issue(tpl, plan_out, papers_by_id):
 # Rendering
 # ============================================================================
 
-def render(tpl, tail, week_info, date_range, plan_out, issue, papers_by_id):
+def render(tpl, tail, footer, week_info, date_range, plan_out, issue, papers_by_id):
     roles = {r["id"]: r["role"] for r in issue["paper_roles"]}
     one_liners = {n["id"]: n["one_line"] for n in issue["also_notable"] if n["id"] in papers_by_id}
     ids = [plan_out["lead_id"]] + plan_out["supporting_ids"] + list(one_liners)
@@ -270,6 +326,7 @@ def render(tpl, tail, week_info, date_range, plan_out, issue, papers_by_id):
         f'⚠️ Reality check\n{issue["caveat"]}',
         f'{tpl["take_label"]}\n{issue["take"]}',
         *items,
+        *([footer] if footer else []),
         tail,
     ])
     return caption + '\n\n-----------------------------------\n\n' + article + '\n\n===================================\n'
@@ -316,7 +373,10 @@ def main():
     history = [h for h in history if h['week'] != args.planned_date]  # regenerating a week must not exclude its own picks
     used_ids = {h['lead_id'] for h in history} | {i for h in history for i in h.get('supporting_ids', [])}
 
-    df = pd.read_csv(f'./{query_safe}/crawling/{args.input_file}', encoding='utf-8-sig', dtype={'arxiv_id': str})
+    crawled = f'./{query_safe}/crawling/{args.input_file}'
+    if not os.path.exists(crawled):
+        sys.exit(f'Crawled file not found: {crawled} (did the crawl fail, e.g. arxiv.org unreachable?)')
+    df = pd.read_csv(crawled, encoding='utf-8-sig', dtype={'arxiv_id': str})
     df = df[~df['arxiv_id'].isin(used_ids)]
     df = rank_papers(df, args.query)
     df = df[df['score'] >= 1].head(args.max_candidates).reset_index(drop=True)
@@ -344,7 +404,9 @@ def main():
 
     print('Stage 3: writing the issue')
     issue = write_issue(tpl, plan_out, papers_by_id)
-    text = render(tpl, templates[query_safe]['tail'], week_info, date_range, plan_out, issue, papers_by_id)
+    footers = templates.get('curated_footers', [])
+    footer = footers[upload_date.isocalendar()[1] % len(footers)] if footers else ''   # rotates by ISO week, no API needed
+    text = render(tpl, templates[query_safe]['tail'], footer, week_info, date_range, plan_out, issue, papers_by_id)
 
     output_file = f'{out_dir}/curated_{args.input_file.replace(".csv", ".txt")}'
     with open(output_file, 'w', encoding='utf-8-sig') as f:
