@@ -26,7 +26,9 @@ input_file = f'{date_from}_{date_to}.csv'
 if args.curated:
     if not args.planned_date:
         raise SystemExit('--planned-date is required with --curated')
-    subprocess.run(["python", "curated_newsletter.py", "--query", args.query, "--input-file", input_file, "--planned-date", args.planned_date])
-    raise SystemExit  # the curated flow picks papers itself
+    result = subprocess.run(["python", "curated_newsletter.py", "--query", args.query, "--input-file", input_file, "--planned-date", args.planned_date])
+    if result.returncode != 3:  # 3 = no Claude subscription or API key available
+        raise SystemExit(result.returncode)
+    print('No Claude subscription or API key available - falling back to the keyword-based selection.')
 
 subprocess.run(["python", f"{UTILS_DIR}/rank_parser.py", "--query", args.query, '--input-file', input_file, '--num-papers', num_papers])
