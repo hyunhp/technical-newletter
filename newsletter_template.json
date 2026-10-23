@@ -47,6 +47,7 @@
       "before_footer"
     ],
     "divider_style": "line",
-    "subtitle_level": 0
+    "subtitle_level": 0,
+    "divider_length": 30
   }
 }
