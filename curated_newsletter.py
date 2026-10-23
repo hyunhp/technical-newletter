@@ -336,7 +336,7 @@ def render(tpl, tail, footer, week_info, date_range, plan_out, issue, papers_by_
     return caption + '\n\n' + SECTION_BREAK + '\n\n' + article + '\n\n' + END_MARK + '\n'
 
 
-def to_markdown(text, cover_url=''):
+def to_markdown(text, cover_url='', dividers=('between_sections', 'before_papers', 'between_papers', 'before_footer'), divider_style='hr', subtitle_level=2):
     """Markdown version of the issue, meant to be opened in a local preview and copied from there.
 
     Pasting from an email breaks the text (Gmail turns emoji into images, wraps links in redirect
@@ -348,11 +348,21 @@ def to_markdown(text, cover_url=''):
     article = article.split('\n' + END_MARK)[0].strip()
     paragraphs = article.split('\n\n')
     title, _, subtitle = paragraphs[0].partition('\n')
-    body = [subtitle] if subtitle else []
+    divider = '---' if divider_style == 'hr' else '─' * 30   # 'hr' pastes as a horizontal rule, 'line' as plain text
+    body, seen_item = ([f'{"#" * subtitle_level} {subtitle}'] if subtitle else []), False   # the date-range line is the article subtitle
     for para in paragraphs[1:]:
         lines = para.split('\n')
-        if len(lines) > 1 and len(lines[0]) <= 40 and not lines[0][0].isascii():
-            lines[0] = f'**{lines[0]}**'   # section heading such as "🔎 What happened"
+        is_heading = len(lines) > 1 and len(lines[0]) <= 40 and not lines[0][0].isascii()   # e.g. "🔎 What happened"
+        is_item = para.startswith('**(')       # "**(1) Paper title** – ..."
+        is_footer = para.startswith('🔖')
+        if is_heading:
+            lines[0] = f'**{lines[0]}**'
+        if ((is_item and not seen_item and 'before_papers' in dividers)
+                or (is_item and seen_item and 'between_papers' in dividers)
+                or (is_footer and 'before_footer' in dividers)
+                or (is_heading and 'between_sections' in dividers)):
+            body.append(divider)
+        seen_item = seen_item or is_item
         body.append('  \n'.join(lines))     # two trailing spaces = a real line break in markdown
     article_md = re.sub(r'(https?://[^\s<>]+)', r'<\1>', '\n\n'.join(body))
 
@@ -453,7 +463,10 @@ def main():
         f.write(text)
     markdown_file = output_file[:-len('.txt')] + '.md'
     with open(markdown_file, 'w', encoding='utf-8') as f:
-        f.write(to_markdown(text, tpl.get('cover_url', '')))
+        layout = templates.get('curated_layout', {})
+        f.write(to_markdown(text, tpl.get('cover_url', ''),
+                            tuple(layout.get('dividers', ('between_sections', 'before_papers', 'between_papers', 'before_footer'))),
+                            layout.get('divider_style', 'hr'), layout.get('subtitle_level', 2)))
 
     history.append({'week': args.planned_date, 'thread_title': plan_out['thread_title'],
                     'lead_id': plan_out['lead_id'], 'supporting_ids': plan_out['supporting_ids']})

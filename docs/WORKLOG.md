@@ -64,6 +64,12 @@ Gmail에서 복사해 LinkedIn 편집기에 붙이면 (1) 이모지가 **이미�
 본문은 마크다운 **미리보기**(VS Code 등)에서 복사해야 굵게와 링크가 유지된다. 이 방법이 LinkedIn 뉴스레터 편집기에서 실제로 깔끔히 붙는지는
 사용자가 첫 업로드에서 확인한다(안 되면 HTML 판을 추가하는 대안이 있다).
 
+## `.md` 본문 구분선 (2026-10-23)
+
+LinkedIn 편집기에서 사용자가 손으로 넣던 구분선을 `.md`에 `---`로 넣는다. 위치(사용자가 알려준 구조): 훅 뒤, 섹션 사이(What happened … Editor's Take), 논문 목록 앞,
+논문 사이, 푸터 앞. 푸터와 꼬리말 사이에는 없다. 날짜 줄(부제목)은 `##` 헤딩. 설정은 `newsletter_template.json`의 `curated_layout`.
+붙여넣었을 때 `---`가 LinkedIn의 구분선이 되는지는 사용자가 확인한다(안 되면 `divider_style`을 `line`으로).
+
 ## 기존 방식 대비 검토 (2026-10-23, 검토만 하고 변경하지 않음)
 
 - 기존 방식 파일(`weekly_newsletter.py`, `daily_newsletter.py`, `rank_parser.py`, `summarize_abstract.py`, 가이드 txt)은 **하나도 바뀌지 않았다.** `--curated` 없이 실행하면 예전과 똑같이 돈다.

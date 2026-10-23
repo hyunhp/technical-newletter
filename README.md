@@ -47,6 +47,8 @@ python commands.py --query LLM --date-from 2026-09-28 --date-to 2026-10-04 --cur
 
 문구(제목, 해시태그, 캡션 인트로, `take_label`, 독자·관점 설명)는 `newsletter_template.json`의 `curated` 블록에서 수정합니다. 본문 끝(꼬리말 바로 위)에는 `curated_footers`의 문구가 주차마다 돌아가며 한 줄 들어갑니다(API 불필요, 비우면 푸터 없음).
 
+`.md` 본문의 구분선(`---`)과 부제목 크기는 `newsletter_template.json`의 `curated_layout`에서 정합니다. `dividers`에 `between_sections`(섹션 사이), `before_papers`, `between_papers`, `before_footer` 중 원하는 위치를 넣고, `divider_style`이 `hr`이면 진짜 가로선, `line`이면 `──────` 글자 줄입니다(붙여넣었을 때 가로선이 사라지면 `line`으로). `subtitle_level`은 날짜 줄의 제목 크기(2 = `##`)입니다.
+
 ## 기존 방식
 
 `100. Guide/뉴스레터 가이드.txt` 참고. (`commands.py` → `llm` 열 추가 → `daily_newsletter.py` / `weekly_newsletter.py`)
