@@ -1,13 +1,14 @@
-Start Your Week Informed — Explore 5 Key Papers Driving the Future of LLMs and Generative AI!
+Start Your Week Informed — Explore 6 Key Papers Driving the Future of LLMs and Generative AI!
 
-Your agent's "forget that" mostly doesn't
+Your agent's "forget this" mostly doesn't work
 Stay ahead with insights that matter.
 
 (1) Can Agents Forget When Asked? A Benchmark for Memory Unlearning in LLM Agents
 (2) MemCut: Every Secret Leaves a Trail in the Long-Term Memory of LLM Agents
-(3) Do Factuality Methods Make LLMs More Factual? Reproducibility and Fair Comparison
-(4) The Window Is in the Reasoning: When LLM Agents Decide to Follow Prompt Injections
-(5) Enforcing Code Reasoning in Agentic Scaffold for More Effective Issue Resolution
+(3) New Model, Old Habits: Behavior Transfer under Model Swapping in Multi-Session LLM Agents
+(4) Lost in Implicit Routing: How LLM Agents Fail to Load Relevant Skills at Scale
+(5) When Code Becomes an LLM Call: An Empirical Study of Call-Site Contracts in Agentic Systems
+(6) The Window Is in the Reasoning: When LLM Agents Decide to Follow Prompt Injections
 
 #LLMResearch #GenAI #AIInnovation #ResearchDigest #WeeklyUpdate
 
@@ -16,42 +17,46 @@ Stay ahead with insights that matter.
 📰 LLM Research Weekly Papers | 4th Week of October 2026
 Top Papers in Large Language Models (12 October - 18 October)
 
-Researchers tested six mainstream agent memory systems on requests to delete something. None of them fully handled more than 1.5% of those requests. A second benchmark found that after the obvious memory was deleted, 39-76% of secrets could still be recovered from what was left.
+Ask an agent with long-term memory to forget something, and it probably won't. Researchers tested six mainstream memory systems on three backbone LLMs, and none of them passed more than 1.5% of forget requests end to end. Most passed none.
 
 🔎 What happened
-Two teams built benchmarks for a test nobody was running: does an agent's memory actually forget when a user asks? Bemula has 50 multi-session dialogues with 135 forget requests of six types and 1,742 test questions. Each dialogue also has a control version without the requests, so a system only gets credit for forgetting something it really stored. The authors tested six mainstream memory systems on three backbone LLMs. None passed more than 1.5% of forget requests end to end, and most passed none. Systems either left the information extractable with simple attacks or deleted far more than asked. MemCut tracks the trail a secret leaves. It has 456 hand-designed secrets with annotated evidence, including messages that never state the secret directly. Even its LLM-guided deletion baseline left 39-76% residual recovery.
+Three papers look at what agent memory holds on to. Bemula has 50 multi-session dialogues with 135 forget requests and 1,742 test questions. Each dialogue has a control version, so a system only gets credit for forgetting a fact it actually stored. The systems failed in one of two ways: the data could still be pulled out with simple attacks, or they deleted far more than was asked. MemCut traces 456 hand-designed secrets through annotated evidence trails, including messages that never state the secret directly. Removing the message that disclosed a secret lowered recovery through the system's own retrieval much more than recovery from the objects left in storage. Even LLM-guided deletion of ten extra turns left 39-76% residual recovery. A third paper finds that when an agent switches to a new model, the new model picks up reasoning and action habits from the old model's history.
 
 🛠 Why it matters
-If you ship an agent with persistent memory, a "forget that" feature is a promise to your users. These results show the obvious implementation, which finds the matching memory and deletes it, fails in two ways. It misses indirect clues, or it wipes unrelated memories along with the target. MemCut's sweeps point to a practical fix. With a fixed deletion budget, searching a wider pool of candidate memories cut residual recovery more than deleting every original candidate did. So better retrieval coverage pays off more than more aggressive deletion. Test forgetting as its own feature, including extraction attempts.
+If your product promises to delete things on request, today's memory layers probably can't keep that promise. Deleting the message that stated a fact doesn't delete the fact. Related turns and other stored objects still point to it. MemCut found that searching a wider pool of candidates helps more than deleting every original candidate, so the real bottleneck is finding every trace. If you route between cheap and strong models, the history you hand over also carries behavior, not just context. Summarize it instead of passing along raw transcripts.
 
 🌱 In plain words
-Say you ask an assistant to shred a letter about your doctor's appointment. They shred it. But your calendar still says "clinic, 3pm." A sticky note mentions the prescription. A draft reply sits in another folder. Anyone flipping through can rebuild the secret. That's what these benchmarks measure. Agent memory spreads facts across summaries and side remarks. Delete only the obvious entry and the trail stays. Delete everything nearby and you lose things you wanted to keep.
+Picture asking a friend to forget an embarrassing story. They promise never to repeat it. But the old group chat is still there, along with the photo captions and the follow-up jokes, and anyone reading them can piece it back together. Agent memory has the same problem. Deleting the one note that stated a secret leaves the clues around it. And when a new assistant takes over by reading the old one's notes, it starts copying the old one's habits too.
 
 ⚠️ Reality check
-Both benchmarks are small and hand-built (50 dialogues in one, 456 secrets in the other). MemCut's 39-76% figure measures residual recovery, where a reader is handed the surviving memories directly. That test is stricter than what the system's own retrieval surfaces, and native recovery fell much more. Neither abstract shows how real users phrase deletion requests.
+These are benchmarks built on constructed dialogues and hand-designed secrets. MemCut's deletion methods are reference baselines, not the best anyone could build. The abstracts don't say which memory systems were tested or how much the results vary between them. The model-swap finding comes from controlled multi-session tasks, not production traffic.
 
 💭 Editor's Take
-Agent memory is designed to write and retrieve, and deletion gets added later as a search. That's why it fails. Until a vendor reports something like Bemula's end-to-end pass rate, I'd treat "delete" claims in memory products as unverified. Watch for a system that records provenance when it writes, linking every derived summary back to its source turns, and reports both removal and preservation scores. If that pushes well past the 1.5% ceiling, this is an engineering gap and not a fundamental limit.
+Today, "we delete on request" is a claim almost no agent memory system can back up. The weak point isn't the delete call. It's that these systems don't know everywhere a fact has spread. Until a system shows a meaningful pass rate on an end-to-end suite like Bemula's, I'd treat that claim as unverified. The thing to watch is whether memory designs start recording, at write time, which stored objects came from which turn. MemCut's coverage finding points there, and a system with that tracking that cut residual recovery sharply would change my view.
 
-**(1) Can Agents Forget When Asked? A Benchmark for Memory Unlearning in LLM Agents** – Introduces Bemula, the first benchmark built for memory unlearning, and finds that no tested memory system completes more than 1.5% of forget requests end to end.
+**(1) Can Agents Forget When Asked? A Benchmark for Memory Unlearning in LLM Agents** – Lead: the Bemula benchmark shows that no tested memory system passes more than 1.5% of forget requests end to end; failures either leave data extractable or delete too much.
 
 Read More : https://arxiv.org/abs/2610.18052
 
-**(2) MemCut: Every Secret Leaves a Trail in the Long-Term Memory of LLM Agents** – Introduces MemCut, which follows each secret's evidence trail and shows that LLM-guided deletion still leaves 39-76% residual recovery, with candidate coverage as the bottleneck.
+**(2) MemCut: Every Secret Leaves a Trail in the Long-Term Memory of LLM Agents** – Explains why deletion fails: secrets leave evidence trails, and residual recovery stays at 39-76% even after LLM-guided deletion of extra turns.
 
 Read More : https://arxiv.org/abs/2610.21405
 
-**(3) Do Factuality Methods Make LLMs More Factual? Reproducibility and Fair Comparison** – A reproducibility study that compares published factuality-alignment methods fairly to check whether they actually make LLMs more factual.
+**(3) New Model, Old Habits: Behavior Transfer under Model Swapping in Multi-Session LLM Agents** – Widens the story: transferred history carries the previous model's reasoning and action habits into the new one, and summarization (including the proposed DASH) reduces this.
 
-Read More : https://arxiv.org/abs/2610.18415
+Read More : https://arxiv.org/abs/2610.19712
 
-**(4) The Window Is in the Reasoning: When LLM Agents Decide to Follow Prompt Injections** – Uses branching rollouts to test whether an agent's decision to follow a prompt injection is settled when it reads the injection, an assumption that runtime monitors and single-run benchmarks share.
+**(4) Lost in Implicit Routing: How LLM Agents Fail to Load Relevant Skills at Scale** – Add irrelevant skills to an agent and it loads fewer or none of the relevant ones, even though they are still available. The authors call this skill routing collapse.
+
+Read More : https://arxiv.org/abs/2610.18522
+
+**(5) When Code Becomes an LLM Call: An Empirical Study of Call-Site Contracts in Agentic Systems** – An empirical look at what happens to specs and testing when parts of a program's logic, like choosing the next tool or judging whether an action is allowed, become LLM calls.
+
+Read More : https://arxiv.org/abs/2610.24545
+
+**(6) The Window Is in the Reasoning: When LLM Agents Decide to Follow Prompt Injections** – Branching rollouts test the common assumption that an agent's choice to follow a prompt injection is settled the moment it reads the injection. The title says the decision window is in the reasoning.
 
 Read More : https://arxiv.org/abs/2610.24048
-
-**(5) Enforcing Code Reasoning in Agentic Scaffold for More Effective Issue Resolution** – Across 7,955 SWE-bench issue-resolution trajectories from six scaffolds, finds 12 forms of code reasoning in 66.95% of trajectories and studies forcing that reasoning inside the agent scaffold.
-
-Read More : https://arxiv.org/abs/2610.23782
 
 🔖 If this newsletter helps your learning, you may like cert-bank too: free AWS and Palantir certification practice with explanations. https://hyunhp.github.io/cert-bank/
 

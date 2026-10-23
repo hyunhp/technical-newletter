@@ -1,0 +1,90 @@
+# 📰 Quantum Computing Weekly Papers | 4th Week of October 2026
+
+Use the heading above as the newsletter title.
+
+![cover](https://raw.githubusercontent.com/hyunhp/technical-newletter/main/99.%20Image/quantum/quantum-curated-cover.png)
+
+Cover image: https://raw.githubusercontent.com/hyunhp/technical-newletter/main/99.%20Image/quantum/quantum-curated-cover.png
+
+---
+
+## 1) POST TEXT
+
+Copy everything inside the box into the LinkedIn post (plain text).
+
+```text
+Step Into the Quantum Frontier — Explore 6 Key Papers Shaping the Next Wave of Quantum Computing!
+
+Error correction now runs on a cloud chip. Scaling it up may hit a limit on fridge heat and power, not qubits
+Stay ahead with insights that matter.
+
+(1) Architecting Instruction Execution for Scalable Fault-Tolerant Quantum Computing
+(2) Energetics of Fault-Tolerant Spin-Qubit Quantum Computation
+(3) Demonstration of Logical Error Suppression in a Surface Code Memory on a Cloud-Accessible IBM Superconducting Processor
+(4) Realization Divergence in Multi-Provider Quantum Computing : A Pre-Registered Study of What Survives Measurement
+(5) Discovering state-of-the-art quantum circuits with large language models
+(6) Optimal robust single-qubit gates in superconducting quantum processors
+
+#QuantumComputing #QuantumResearch #Innovation #DeepTech #WeeklyDigest
+```
+
+---
+
+## 2) NEWSLETTER ARTICLE
+
+Copy the part below the line **from the rendered preview**, not from the raw text, so bold and links keep their formatting.
+
+---
+
+Top Research Highlights (12 October - 18 October)
+
+On IBM's cloud-accessible hardware, going from surface-code distance 3 to 6 more than halved the logical error rate per round. A separate study, though, finds that sending low-level control instructions into the fridge at fault-tolerant scale would exceed the refrigerator's heat limits "by orders of magnitude."
+
+**🔎 What happened**  
+Three papers fit together this week. On IBM's Nighthawk r2 processor, a team ran a surface-code memory, a basic error-correction test. They tuned how the circuit checks for errors: short readout, measurement fused with reset, and an XX echo pulse. Going from distance 3 to 6 cut the per-round logical error rate from 0.53% to 0.24% in Z memory and from 0.52% to 0.22% in X memory. That gives suppression factors of 1.68 and 1.85. Over runs of up to 150 rounds, the advantage from larger distance weakened. The ARIES study simulated eight applications on superconducting and Majorana platforms. Physical-level instructions blew through dilution-fridge thermal limits. A "Level 4" interface that sends local logical operations gave the best balance. A spin-qubit energy model found that at scale, control electronics and decoding use the most power. It estimates about 100 kW for roughly one million physical qubits.
+
+**🛠 Why it matters**  
+If you're reading a roadmap, qubit count and gate fidelity are not the whole bill. The instruction interface decides how much data has to flow into the fridge, and that sets the heat load. The spin-qubit model says tuning the control-signal demultiplexing ratio alone could cut total energy by about two orders of magnitude. That's a wiring choice, not a physics breakthrough. On the IBM chip, circuit optimization alone cut the median X-basis logical error rate by a factor of 3.8. Control electronics, readout and decoders need as much engineering attention as the qubits.
+
+**🌱 In plain words**  
+Picture running a big kitchen inside a freezer, and the only way to give orders is through a small mail slot. If you pass in every tiny step ("lift spoon, stir once"), the slot jams and each slip of paper lets warmth in. If you only pass in "make dinner," the cooks inside need more brains than the cramped freezer can hold. ARIES argues the sweet spot is mid-level orders like "make this dish at station four." The energy paper then adds up the electricity bill.
+
+**⚠️ Reality check**  
+The ARIES and spin-qubit results come from simulations and energy models, not hardware. The 100 kW figure is an estimate for a machine nobody has built. The IBM run is real hardware, but its suppression factors are modest, and over long runs the distance advantage faded alongside long-lived correlations that may reflect a persistent error.
+
+**💭 Editor's Take**  
+The interesting news here is the control stack, not the qubits. ARIES suggests that bad interface choices, not physics, could cap scale. The 100 kW figure for a million qubits is the kind of number that ends up in pitch decks without its assumptions attached, so treat it as a best case. What would change my mind: a hardware demo of a logical-level instruction interface, or of on-chip demultiplexing, staying inside a real fridge's heat budget. Also watch whether IBM's long-lived correlations turn out to be a persistent error mechanism. That would matter more than any power estimate.
+
+**(1) Architecting Instruction Execution for Scalable Fault-Tolerant Quantum Computing** – Lead: a simulation-based framework (ARIES) showing that low-level instruction sets exceed fridge thermal limits at scale, while local logical operations offer the best trade-off.
+
+Read More : <https://arxiv.org/abs/2610.17058>
+
+**(2) Energetics of Fault-Tolerant Spin-Qubit Quantum Computation** – Energy model for spin-qubit fault tolerance: control electronics and decoding dominate at scale, cooling limits growth, and about 100 kW is estimated for roughly one million physical qubits.
+
+Read More : <https://arxiv.org/abs/2610.22199>
+
+**(3) Demonstration of Logical Error Suppression in a Surface Code Memory on a Cloud-Accessible IBM Superconducting Processor** – Hardware anchor: surface-code error suppression from distance 3 to 6 on a cloud IBM processor, with limits showing up over long runs.
+
+Read More : <https://arxiv.org/abs/2610.23840>
+
+**(4) Realization Divergence in Multi-Provider Quantum Computing : A Pre-Registered Study of What Survives Measurement** – Same circuit, different software stacks: a pre-registered hardware study across three vendors and four devices measures how much compilers and vendor services change what actually runs.
+
+Read More : <https://arxiv.org/abs/2610.21714>
+
+**(5) Discovering state-of-the-art quantum circuits with large language models** – Large language models are used to search for better circuits for key quantum building blocks. The abstract excerpt cuts off before the results, so the claims can't be judged yet.
+
+Read More : <https://arxiv.org/abs/2610.22367>
+
+**(6) Optimal robust single-qubit gates in superconducting quantum processors** – Energy-optimal single-qubit pulses for superconducting chips, designed to tolerate frequency detuning and waveform imperfections and to suppress leakage.
+
+Read More : <https://arxiv.org/abs/2610.24212>
+
+🔖 If this newsletter helps your learning, you may like cert-bank too: free AWS and Palantir certification practice with explanations. <https://hyunhp.github.io/cert-bank/>
+
+Thank you for reading this week’s Quantum Computing Highlights!  
+I hope these papers added valuable perspective to your quantum research journey. Stay tuned for next week’s digest featuring more cutting-edge findings and emerging discussions in quantum technology.
+
+Your feedback and suggestions are always welcome.
+
+Best regards,  
+Hyunho
