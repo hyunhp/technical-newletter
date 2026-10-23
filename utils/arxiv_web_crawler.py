@@ -212,6 +212,40 @@ def parse_page(
 # Crawl
 # ============================================================================
 
+def fetch_page(session, url, attempts=4):
+
+    # arXiv search answers 500 intermittently, so retry with a growing pause
+    for attempt in range(1, attempts + 1):
+
+        try:
+
+            # arXiv sets an 'arxiv-search-parameters' cookie on the first page and
+            # answers 500 when it is sent back with a different start offset
+            session.cookies.clear()
+
+            response = session.get(
+                url,
+                timeout=60,
+                verify=False
+            )
+
+            response.raise_for_status()
+
+            return response
+
+        except Exception as e:
+
+            logger.warning(
+                f"Attempt {attempt}/{attempts} failed: {e}"
+            )
+
+            if attempt < attempts:
+
+                time.sleep(10 * attempt)
+
+    return None
+
+
 def crawl_arxiv(
     query,
     date_from,
@@ -224,6 +258,10 @@ def crawl_arxiv(
     start = 0
 
     all_papers = []
+
+    seen_dense = False
+
+    sparse_pages = 0
 
     logger.info(
         f"Searching query='{query}'"
@@ -241,19 +279,17 @@ def crawl_arxiv(
             f"Fetching start={start}"
         )
 
-        try:
+        response = fetch_page(
+            session,
+            url
+        )
 
-            response = session.get(
-                url,
-                timeout=30,
-                verify=False
+        if response is None:
+
+            logger.error(
+                f"Giving up at start={start}; "
+                f"keeping the {len(all_papers)} papers collected so far"
             )
-
-            response.raise_for_status()
-
-        except Exception as e:
-
-            logger.error(e)
 
             break
 
@@ -273,25 +309,56 @@ def crawl_arxiv(
             papers
         )
 
-        result_count = len(
-            BeautifulSoup(
-                response.text,
-                "html.parser"
-            ).select(
-                "li.arxiv-result"
-            )
+        results = BeautifulSoup(
+            response.text,
+            "html.parser"
+        ).select(
+            "li.arxiv-result"
         )
+
+        result_count = len(
+            results
+        )
+
+        # The range shows up as a dense block of pages (dates are noisy, so a single
+        # old or recent paper proves nothing). Stop after that block, once two pages
+        # in a row hold almost nothing from the range.
+        density = (
+            len(papers) / result_count
+            if result_count else 0
+        )
+
+        if density >= 0.3:
+
+            seen_dense = True
+            sparse_pages = 0
+
+        elif seen_dense and density < 0.1:
+
+            sparse_pages += 1
+
+        else:
+
+            sparse_pages = 0
 
         logger.info(
             f"Collected={len(all_papers)}"
         )
+
+        if sparse_pages >= 2:
+
+            logger.info(
+                "Past the requested range; stopping."
+            )
+
+            break
 
         if result_count < page_size:
             break
 
         start += page_size
 
-        time.sleep(2)
+        time.sleep(5)
 
     return all_papers
 
