@@ -21,7 +21,7 @@ pip install -r requirements.txt
 python commands.py --query LLM --date-from 2026-09-28 --date-to 2026-10-04 --curated --planned-date 2026-10-12
 ```
 
-결과: `<Query>/newsletter/curated_<날짜>.txt` (위쪽 게시글 캡션 + 아래 본문). **발행 전에 직접 읽고 Editor's Take를 확인하세요.** 초록만 보고 쓴 AI 초안입니다.
+결과: `<Query>/newsletter/curated_<날짜>.txt`와 같은 내용의 `.md` (위쪽 게시글 캡션 + 아래 본문). **LinkedIn에 올릴 때는 `.md`를 쓰세요.** 메일에서 복사하면 이모지가 이미지로, 링크가 리다이렉트 주소로 바뀝니다. `.md`를 로컬 미리보기(VS Code 등)에서 열어, 게시글 글은 코드 블록에서, 본문은 렌더링된 미리보기에서 복사합니다. **발행 전에 직접 읽고 Editor's Take를 확인하세요.** 초록만 보고 쓴 AI 초안입니다.
 
 ### Claude 사용 순서
 
