@@ -70,6 +70,8 @@ LinkedIn 편집기에서 사용자가 손으로 넣던 구분선을 `.md`에 `--
 논문 사이, 푸터 앞. 푸터와 꼬리말 사이에는 없다. 날짜 줄(부제목)은 `##` 헤딩. 설정은 `newsletter_template.json`의 `curated_layout`.
 붙여넣었을 때 `---`와 `##`는 LinkedIn에 **글자 그대로** 들어왔다(굵게는 변환됨). 그래서 기본값을 `divider_style: line`(글자 줄 `──────`), `subtitle_level: 0`(굵은 줄, 붙인 뒤 부제목 스타일만 지정)으로 바꿨다. 진짜 가로선과 `##` 헤딩은 설정으로 되돌릴 수 있다.
 
+**결정(2026-10-23): 구분선은 자동으로 넣지 않는다.** 글자 줄은 진짜 구분선과 모양이 달라서, 사용자가 LinkedIn의 구분선 버튼으로 직접 넣기로 했다. `curated_layout.dividers`는 빈 목록이다. 부제목은 굵은 줄 그대로.
+
 ## 기존 방식 대비 검토 (2026-10-23, 검토만 하고 변경하지 않음)
 
 - 기존 방식 파일(`weekly_newsletter.py`, `daily_newsletter.py`, `rank_parser.py`, `summarize_abstract.py`, 가이드 txt)은 **하나도 바뀌지 않았다.** `--curated` 없이 실행하면 예전과 똑같이 돈다.

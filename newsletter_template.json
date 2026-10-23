@@ -40,12 +40,7 @@
     "🔖 If this newsletter helps your learning, you may like cert-bank too: free AWS and Palantir certification practice with explanations. https://hyunhp.github.io/cert-bank/"
   ],
   "curated_layout": {
-    "dividers": [
-      "between_sections",
-      "before_papers",
-      "between_papers",
-      "before_footer"
-    ],
+    "dividers": [],
     "divider_style": "line",
     "subtitle_level": 0,
     "divider_length": 30
