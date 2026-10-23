@@ -37,7 +37,7 @@ Windows `claude.cmd` 셸(인자 깨짐)은 프롬프트를 표준입력으로 �
 - 날짜 규칙: DATE_TO = 가장 최근 일요일, DATE_FROM = 그 6일 전(월요일), PLANNED = DATE_TO + 1일.
 - 하는 일: 크롤링 → 큐레이션 → `claude/newsletter-drafts` 브랜치의 `drafts/<날짜>/`에 저장 → **본인에게 메일 1통씩**
   (맨 위 표지 이미지 링크, "1) POST TEXT"와 "2) NEWSLETTER ARTICLE" 구분) → 로컬 브랜치 정리 →
-  머지된 `curated-newsletter`, `cover-images`만 원격에서 삭제(토큰이 없으면 건너뜀) → 짧은 보고서와 푸시 알림.
+  머지된 `curated-newsletter`, `cover-images`의 원격 삭제 시도(클라우드에서는 403이라 건너뜀) → 짧은 보고서와 푸시 알림.
 - 프롬프트 전문은 claude.ai/code/routines의 해당 루틴에 있다. 수신자 주소는 공개 저장소에 적지 않았으므로(프롬프트 6단계 참고)
   루틴에서 확인하세요.
 - 루틴을 수정할 때: 저장소 연결(Repository)과 Gmail 커넥터는 **claude.ai 루틴 화면**에서만 설정된다(도구로는 못 함).
@@ -69,19 +69,19 @@ Windows `claude.cmd` 셸(인자 깨짐)은 프롬프트를 표준입력으로 �
 - #3 표지 이미지 (머지 `77a8808`)
 - 이 문서와 `CLAUDE.md`, `99. Image/make_covers.py`는 `worklog` 브랜치의 PR로 머지
 
-## 할 일 (우선순위 순)
+## 할 일
 
-1. **첫 정식 실행(2026-10-26 월 07:38 KST) 확인**: 메일 2통(제목에 `[TEST]` 없음), `claude/newsletter-drafts`의
-   `drafts/2026-10-26/`와 `drafts/_history/`, 보고서의 "스토리 기록 복원 여부"(첫 주는 기록 없음이 정상).
-2. **발행 전 사람의 검토**: Editor's Take는 초록만 읽고 쓴 AI 의견이다. 숫자·링크를 훑고 Take에 동의하는지 확인.
-3. 원격 브랜치 `curated-newsletter`, `cover-images`(둘 다 머지됨)가 남아 있으면 GitHub에서 Delete branch.
-   기존 `weekly-newsletter-automation` 브랜치는 이 작업과 무관하므로 건드리지 않았다.
-4. 시험 메일 4통(`[TEST]`)이 실제로 도착했는지 사용자가 확인(도착 여부는 보고서의 "발송 성공"만 확인했고 메일함은 열어 보지 않았다).
-5. Windows 로컬 실행은 직접 해 보지 못했다. 첫 실행은 `--dry-run`으로. 구독이 안 되면 API/기존 방식으로 자동 전환된다.
-6. (선택) 후원 링크: 지금 푸터는 cert-bank 사이트만 건다. `support.html`은 사이트 안에서 이어진다.
-7. (선택) 기존 방식의 `rank_parser.py`는 후보가 선택 편수보다 적으면 오류가 난다(이번 변경과 무관한 기존 제약).
-8. (선택) Editor's Take 공개 방식: 지금 라벨은 "💭 Editor's Take". AI 보조 표기를 넣으려면 `newsletter_template.json`의 `take_label`을 바꾼다.
-9. 표지 이미지를 바꾸려면 `99. Image/make_covers.py`의 `COVERS`를 고쳐 실행(Chromium, Pillow, Inter 폰트 필요).
+1. 머지된 원격 브랜치 `curated-newsletter`, `cover-images`, `worklog`(와 이후 머지된 작업 브랜치) 삭제.
+   **클라우드 세션과 루틴은 원격 브랜치를 지울 수 없다**(REST와 git 모두 프록시가 403). GitHub의 PR 화면에서 Delete branch를 누르거나 로컬에서
+   `git push origin --delete <이름>`을 쓴다. 루틴 프롬프트 7b의 원격 삭제는 이 때문에 매번 "건너뜀"으로 보고된다. 기존
+   `weekly-newsletter-automation` 브랜치는 이 작업과 무관하므로 건드리지 않았다.
+2. Windows 로컬 실행은 직접 해 보지 못했다. 첫 실행은 `--dry-run`으로. 구독이 안 되면 API/기존 방식으로 자동 전환된다.
+3. (선택) 후원 링크: 지금 푸터는 cert-bank 사이트만 건다. `support.html`은 사이트 안에서 이어진다.
+4. (선택) 기존 방식의 `rank_parser.py`는 후보가 선택 편수보다 적으면 오류가 난다(이번 변경과 무관한 기존 제약).
+5. (선택) Editor's Take 공개 방식: 지금 라벨은 "💭 Editor's Take". AI 보조 표기를 넣으려면 `newsletter_template.json`의 `take_label`을 바꾼다.
+6. (선택) 표지 이미지를 바꾸려면 `99. Image/make_covers.py`의 `COVERS`를 고쳐 실행(Chromium, Pillow, Inter 폰트 필요).
+
+첫 정식 실행(2026-10-26 월 07:38 KST)의 확인, 발행 전 사람의 검토(Editor's Take는 AI 초안), 시험 메일 도착 확인은 사용자가 직접 챙기기로 해서 할 일에서 뺐다.
 
 ## 결정 사항 / 사용자 지침
 
