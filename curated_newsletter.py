@@ -358,14 +358,17 @@ def to_markdown(text, cover_url=''):
 
     cover = f'![cover]({cover_url})\n\nCover image: {cover_url}\n\n' if cover_url else ''
     return (f'# {title}\n\n'
+            '**How to use:** open this file in VS Code, then press **Ctrl+Shift+V** to open the rendered **preview** and copy from the preview. '
+            'Do not copy from the source view (dark editor): it carries the editor colors and raw `#`, `**` marks. '
+            'Paste with a normal Ctrl+V, not Ctrl+Shift+V.\n\n'
             'Use the heading above as the newsletter title.\n\n'
             f'{cover}---\n\n'
             '## 1) POST TEXT\n\n'
-            'Copy everything inside the box into the LinkedIn post (plain text).\n\n'
+            'Copy everything inside the box into the LinkedIn post (plain text; Ctrl+Shift+V is fine here).\n\n'
             f'```text\n{caption.strip()}\n```\n\n'
             '---\n\n'
             '## 2) NEWSLETTER ARTICLE\n\n'
-            'Copy the part below the line **from the rendered preview**, not from the raw text, so bold and links keep their formatting.\n\n'
+            'Select everything below the line **in the rendered preview**, copy it, and paste it into the LinkedIn article editor with a normal Ctrl+V so bold and links keep their formatting.\n\n'
             f'---\n\n{article_md}\n')
 
 
