@@ -38,5 +38,15 @@
     "🔖 Side project: cert-bank, free and original practice questions plus a day-by-day study guide for AWS and Palantir certifications. https://hyunhp.github.io/cert-bank/",
     "🔖 Preparing for a cloud certification? cert-bank has free practice questions with explanations for AWS and Palantir exams: https://hyunhp.github.io/cert-bank/ (support is optional)",
     "🔖 If this newsletter helps your learning, you may like cert-bank too: free AWS and Palantir certification practice with explanations. https://hyunhp.github.io/cert-bank/"
-  ]
+  ],
+  "curated_layout": {
+    "dividers": [
+      "between_sections",
+      "before_papers",
+      "between_papers",
+      "before_footer"
+    ],
+    "divider_style": "hr",
+    "subtitle_level": 2
+  }
 }
