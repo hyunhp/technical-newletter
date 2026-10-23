@@ -12,7 +12,8 @@
       "hashtags": "#QuantumComputing #QuantumResearch #Innovation #DeepTech #WeeklyDigest",
       "take_label": "💭 Editor's Take",
       "audience": "Engineers and technically curious professionals who follow quantum computing but do not read papers daily, plus newcomers. They want to know what changed, whether it is real, and what to watch.",
-      "angle": "Quantum claims are often oversold. Separate genuine progress (error rates, logical qubits, hardware runs, resource estimates) from simulations and asymptotic promises, and say how far each result is from practical use."
+      "angle": "Quantum claims are often oversold. Separate genuine progress (error rates, logical qubits, hardware runs, resource estimates) from simulations and asymptotic promises, and say how far each result is from practical use.",
+      "cover_url": "https://raw.githubusercontent.com/hyunhp/technical-newletter/main/99.%20Image/quantum/quantum-curated-cover.png"
     }
   },
   "LLM": {
@@ -28,7 +29,8 @@
       "hashtags": "#LLMResearch #GenAI #AIInnovation #ResearchDigest #WeeklyUpdate",
       "take_label": "💭 Editor's Take",
       "audience": "Engineers, product builders and newcomers who use LLMs and want to know which research changes what they should build or expect, without reading every paper.",
-      "angle": "The volume of LLM papers is overwhelming, so the value is direction: which way the field is moving, what is now cheaper, more reliable or newly possible, and which claims depend on benchmarks that may not transfer to real products."
+      "angle": "The volume of LLM papers is overwhelming, so the value is direction: which way the field is moving, what is now cheaper, more reliable or newly possible, and which claims depend on benchmarks that may not transfer to real products.",
+      "cover_url": "https://raw.githubusercontent.com/hyunhp/technical-newletter/main/99.%20Image/llm/llm-curated-cover.png"
     }
   },
   "curated_footers": [

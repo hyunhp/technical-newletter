@@ -306,6 +306,10 @@ def write_issue(tpl, plan_out, papers_by_id):
 # Rendering
 # ============================================================================
 
+SECTION_BREAK = '-----------------------------------'
+END_MARK = '==================================='
+
+
 def render(tpl, tail, footer, week_info, date_range, plan_out, issue, papers_by_id):
     roles = {r["id"]: r["role"] for r in issue["paper_roles"]}
     one_liners = {n["id"]: n["one_line"] for n in issue["also_notable"] if n["id"] in papers_by_id}
@@ -329,7 +333,40 @@ def render(tpl, tail, footer, week_info, date_range, plan_out, issue, papers_by_
         *([footer] if footer else []),
         tail,
     ])
-    return caption + '\n\n-----------------------------------\n\n' + article + '\n\n===================================\n'
+    return caption + '\n\n' + SECTION_BREAK + '\n\n' + article + '\n\n' + END_MARK + '\n'
+
+
+def to_markdown(text, cover_url=''):
+    """Markdown version of the issue, meant to be opened in a local preview and copied from there.
+
+    Pasting from an email breaks the text (Gmail turns emoji into images, wraps links in redirect
+    URLs and drops line breaks). A local file keeps real Unicode emoji and the original links.
+    Part 1 (the LinkedIn post) is a code block, so it copies as exact plain text; part 2 (the
+    article) is normal markdown, so bold, links and paragraphs survive a copy from the preview.
+    """
+    caption, article = text.lstrip('\ufeff').split('\n' + SECTION_BREAK + '\n', 1)
+    article = article.split('\n' + END_MARK)[0].strip()
+    paragraphs = article.split('\n\n')
+    title, _, subtitle = paragraphs[0].partition('\n')
+    body = [subtitle] if subtitle else []
+    for para in paragraphs[1:]:
+        lines = para.split('\n')
+        if len(lines) > 1 and len(lines[0]) <= 40 and not lines[0][0].isascii():
+            lines[0] = f'**{lines[0]}**'   # section heading such as "🔎 What happened"
+        body.append('  \n'.join(lines))     # two trailing spaces = a real line break in markdown
+    article_md = re.sub(r'(https?://[^\s<>]+)', r'<\1>', '\n\n'.join(body))
+
+    cover = f'![cover]({cover_url})\n\nCover image: {cover_url}\n\n' if cover_url else ''
+    return (f'# {title}\n\n'
+            'Use the heading above as the newsletter title.\n\n'
+            f'{cover}---\n\n'
+            '## 1) POST TEXT\n\n'
+            'Copy everything inside the box into the LinkedIn post (plain text).\n\n'
+            f'```text\n{caption.strip()}\n```\n\n'
+            '---\n\n'
+            '## 2) NEWSLETTER ARTICLE\n\n'
+            'Copy the part below the line **from the rendered preview**, not from the raw text, so bold and links keep their formatting.\n\n'
+            f'---\n\n{article_md}\n')
 
 
 # ============================================================================
@@ -411,6 +448,9 @@ def main():
     output_file = f'{out_dir}/curated_{args.input_file.replace(".csv", ".txt")}'
     with open(output_file, 'w', encoding='utf-8') as f:   # no BOM: it would show up as a stray character when pasted or emailed
         f.write(text)
+    markdown_file = output_file[:-len('.txt')] + '.md'
+    with open(markdown_file, 'w', encoding='utf-8') as f:
+        f.write(to_markdown(text, tpl.get('cover_url', '')))
 
     history.append({'week': args.planned_date, 'thread_title': plan_out['thread_title'],
                     'lead_id': plan_out['lead_id'], 'supporting_ids': plan_out['supporting_ids']})
@@ -418,7 +458,7 @@ def main():
         json.dump(history, f, ensure_ascii=False, indent=2)
 
     tokens = ', '.join(f'{model} {key.split("_")[0]}={n}' for (model, key), n in sorted(usage_total.items()))
-    print(f'Curated {args.query} newsletter saved: {output_file}\nTokens: {tokens}')
+    print(f'Curated {args.query} newsletter saved: {output_file} (+ {markdown_file})\nTokens: {tokens}')
 
 
 if __name__ == "__main__":

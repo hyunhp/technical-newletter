@@ -24,6 +24,7 @@ arXiv 초록으로 만드는 LinkedIn 뉴스레터(LLM, Quantum Computing)를 "�
 | `newsletter_template.json` | `curated` 블록(제목, 캡션 인트로, 해시태그, `take_label`, 독자·관점)과 `curated_footers`(주차별로 도는 cert-bank 푸터 4개) |
 | `utils/arxiv_web_crawler.py` | 크롤러. 이번에 고침(아래) |
 | `99. Image/` | 표지 이미지. `llm/llm-curated-cover.png`, `quantum/quantum-curated-cover.png`, 생성 스크립트 `make_covers.py` |
+| `curated_*.md` | `curated_*.txt`와 같은 내용의 **마크다운 판**(로컬 미리보기에서 복사해 올리는 용도). 게시글 글은 코드 블록, 본문은 일반 마크다운(굵게, 링크, 줄바꿈 유지), 맨 위에 제목과 표지 이미지 |
 | `drafts/` | (브랜치 `claude/newsletter-drafts`에만 있음) 루틴이 만든 초안과 `drafts/_history/` 스토리 기록 |
 
 Claude 사용 순서: **구독(`claude` CLI) → `ANTHROPIC_API_KEY` → 기존 방식**. 구독 호출에서는 API 키 환경 변수를 제거한다
@@ -36,7 +37,7 @@ Windows `claude.cmd` 셸(인자 깨짐)은 프롬프트를 표준입력으로 �
 - **매주 월요일 07:38 KST** (요청은 8시였지만 정각 지연을 피하려고 22분 앞당김). 다음 실행: 2026-10-26.
 - 날짜 규칙: DATE_TO = 가장 최근 일요일, DATE_FROM = 그 6일 전(월요일), PLANNED = DATE_TO + 1일.
 - 하는 일: 크롤링 → 큐레이션 → `claude/newsletter-drafts` 브랜치의 `drafts/<날짜>/`에 저장 → **본인에게 메일 1통씩**
-  (맨 위 표지 이미지 링크, "1) POST TEXT"와 "2) NEWSLETTER ARTICLE" 구분) → 로컬 브랜치 정리 →
+  (표지 이미지 링크, **`.md` 다운로드 링크**, 아래에 읽기용 전체 텍스트) → 로컬 브랜치 정리 →
   머지된 `curated-newsletter`, `cover-images`의 원격 삭제 시도(클라우드에서는 403이라 건너뜀) → 짧은 보고서와 푸시 알림.
 - 프롬프트 전문은 claude.ai/code/routines의 해당 루틴에 있다. 수신자 주소는 공개 저장소에 적지 않았으므로(프롬프트 6단계 참고)
   루틴에서 확인하세요.
@@ -54,6 +55,26 @@ Windows `claude.cmd` 셸(인자 깨짐)은 프롬프트를 표준입력으로 �
 4. 메일/붙여넣기 때 보이지 않는 BOM → 초안을 BOM 없이 저장.
 5. `commands.py`가 `python` 대신 `sys.executable`을 쓴다. 한글 Windows 콘솔 출력 오류 방지(`errors='replace'`).
 6. `requirements.txt`에 `anthropic`, `pandas`, `beautifulsoup4` 추가(크롤러가 쓰는데 빠져 있었음).
+
+## 메일 복사 붙여넣기가 깨지는 이유와 대응 (2026-10-23)
+
+Gmail에서 복사해 LinkedIn 편집기에 붙이면 (1) 이모지가 **이미지**로 들어가 크게 보이고, (2) 링크가 `google.com/url?q=...` **리다이렉트 주소**로 바뀌고,
+(3) 줄바꿈이 사라지며, (4) `**굵게**` 표시가 그대로 글자로 남는다. 그래서 `.md` 파일을 따로 만들고 메일에는 그 파일의 링크를 넣는다.
+로컬에서 파일을 열어 복사하면 이모지는 진짜 문자, 링크는 원본 주소가 된다. 게시글 글(일반 텍스트)은 코드 블록에서 복사하고,
+본문은 마크다운 **미리보기**(VS Code 등)에서 복사해야 굵게와 링크가 유지된다. 이 방법이 LinkedIn 뉴스레터 편집기에서 실제로 깔끔히 붙는지는
+사용자가 첫 업로드에서 확인한다(안 되면 HTML 판을 추가하는 대안이 있다).
+
+## 기존 방식 대비 검토 (2026-10-23, 검토만 하고 변경하지 않음)
+
+- 기존 방식 파일(`weekly_newsletter.py`, `daily_newsletter.py`, `rank_parser.py`, `summarize_abstract.py`, 가이드 txt)은 **하나도 바뀌지 않았다.** `--curated` 없이 실행하면 예전과 똑같이 돈다.
+- 새 형식이 의도적으로 바꾼 것: 소개 문단("Dive into the most notable...") → 훅 / 캡션의 "Each week, we hand-select..." → 이번 주 스토리 한 줄 /
+  논문별 초록 요약 → 스토리 안에서의 역할 문장 / 고정 5편 → 5~6편(스토리 + 한 줄 언급).
+- 새 형식이 **다루지 않는 것**: 일간 뉴스레터(`daily_newsletter.py`, 월~금 하루 3편), Beginner's Corner(`100. Guide/*_beginner_prompt.txt`, 수동), LinkedIn 뉴스레터 썸네일.
+  모두 그대로 쓸 수 있다.
+- `weekly-newsletter-automation` 브랜치(머지 안 됨, PR #1 닫힘): 본인의 이전 Windows 작업 스케줄러 자동화(`run_weekly.py`, `scheduled_task.xml` 수요일 09:00, `claude -p` 요약).
+  기능은 새 클라우드 루틴이 대체하지만 **다른 곳에 없는 작업**이다. PC에 작업이 아직 등록되어 있으면 예전 방식 뉴스레터가 따로 생기니 확인할 것.
+  이 브랜치의 크롤러는 같은 arXiv 500 문제를 **공식 export API**로 풀었다(서버 측 날짜 필터, 누락 없음). 이 클라우드 환경에서는
+  `export.arxiv.org`가 막혀 있어 환경 허용 목록에 추가해야 쓸 수 있다. 가져올지는 미정.
 
 ## 검증 이력
 
@@ -74,12 +95,13 @@ Windows `claude.cmd` 셸(인자 깨짐)은 프롬프트를 표준입력으로 �
 1. 머지된 원격 브랜치 `curated-newsletter`, `cover-images`, `worklog`(와 이후 머지된 작업 브랜치) 삭제.
    **클라우드 세션과 루틴은 원격 브랜치를 지울 수 없다**(REST와 git 모두 프록시가 403). GitHub의 PR 화면에서 Delete branch를 누르거나 로컬에서
    `git push origin --delete <이름>`을 쓴다. 루틴 프롬프트 7b의 원격 삭제는 이 때문에 매번 "건너뜀"으로 보고된다. 기존
-   `weekly-newsletter-automation` 브랜치는 이 작업과 무관하므로 건드리지 않았다.
-2. Windows 로컬 실행은 직접 해 보지 못했다. 첫 실행은 `--dry-run`으로. 구독이 안 되면 API/기존 방식으로 자동 전환된다.
-3. (선택) 후원 링크: 지금 푸터는 cert-bank 사이트만 건다. `support.html`은 사이트 안에서 이어진다.
-4. (선택) 기존 방식의 `rank_parser.py`는 후보가 선택 편수보다 적으면 오류가 난다(이번 변경과 무관한 기존 제약).
-5. (선택) Editor's Take 공개 방식: 지금 라벨은 "💭 Editor's Take". AI 보조 표기를 넣으려면 `newsletter_template.json`의 `take_label`을 바꾼다.
-6. (선택) 표지 이미지를 바꾸려면 `99. Image/make_covers.py`의 `COVERS`를 고쳐 실행(Chromium, Pillow, Inter 폰트 필요).
+   `weekly-newsletter-automation`은 아래 "기존 방식 대비 검토"의 설명처럼 지우지 않는다(머지되지 않은 본인의 작업).
+2. `weekly-newsletter-automation` 처리 결정: (a) PC의 작업 스케줄러에서 `run_weekly.py` 작업 중복 여부 확인, (b) 크롤러를 export API 방식으로 바꿀지 결정(바꾸면 `export.arxiv.org` 허용 필요), (c) 결정 후 브랜치 정리.
+3. Windows 로컬 실행은 직접 해 보지 못했다. 첫 실행은 `--dry-run`으로. 구독이 안 되면 API/기존 방식으로 자동 전환된다.
+4. (선택) 후원 링크: 지금 푸터는 cert-bank 사이트만 건다. `support.html`은 사이트 안에서 이어진다.
+5. (선택) 기존 방식의 `rank_parser.py`는 후보가 선택 편수보다 적으면 오류가 난다(이번 변경과 무관한 기존 제약).
+6. (선택) Editor's Take 공개 방식: 지금 라벨은 "💭 Editor's Take". AI 보조 표기를 넣으려면 `newsletter_template.json`의 `take_label`을 바꾼다.
+7. (선택) 표지 이미지를 바꾸려면 `99. Image/make_covers.py`의 `COVERS`를 고쳐 실행(Chromium, Pillow, Inter 폰트 필요).
 
 첫 정식 실행(2026-10-26 월 07:38 KST)의 확인, 발행 전 사람의 검토(Editor's Take는 AI 초안), 시험 메일 도착 확인은 사용자가 직접 챙기기로 해서 할 일에서 뺐다.
 
