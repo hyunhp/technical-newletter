@@ -409,7 +409,7 @@ def main():
     text = render(tpl, templates[query_safe]['tail'], footer, week_info, date_range, plan_out, issue, papers_by_id)
 
     output_file = f'{out_dir}/curated_{args.input_file.replace(".csv", ".txt")}'
-    with open(output_file, 'w', encoding='utf-8-sig') as f:
+    with open(output_file, 'w', encoding='utf-8') as f:   # no BOM: it would show up as a stray character when pasted or emailed
         f.write(text)
 
     history.append({'week': args.planned_date, 'thread_title': plan_out['thread_title'],
