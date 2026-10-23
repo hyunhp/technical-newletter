@@ -47,7 +47,7 @@ python commands.py --query LLM --date-from 2026-09-28 --date-to 2026-10-04 --cur
 
 문구(제목, 해시태그, 캡션 인트로, `take_label`, 독자·관점 설명)는 `newsletter_template.json`의 `curated` 블록에서 수정합니다. 본문 끝(꼬리말 바로 위)에는 `curated_footers`의 문구가 주차마다 돌아가며 한 줄 들어갑니다(API 불필요, 비우면 푸터 없음).
 
-`.md` 본문의 구분선(`---`)과 부제목 크기는 `newsletter_template.json`의 `curated_layout`에서 정합니다. `dividers`에 `between_sections`(섹션 사이), `before_papers`, `between_papers`, `before_footer` 중 원하는 위치를 넣고, `divider_style`이 `hr`이면 진짜 가로선, `line`이면 `──────` 글자 줄입니다(붙여넣었을 때 가로선이 사라지면 `line`으로). `subtitle_level`은 날짜 줄의 제목 크기(2 = `##`)입니다.
+`.md` 본문의 구분선과 부제목은 `newsletter_template.json`의 `curated_layout`에서 정합니다. `dividers`에 `between_sections`(섹션 사이), `before_papers`, `between_papers`, `before_footer` 중 원하는 위치를 넣습니다. `divider_style`은 기본 `line`(`──────` 글자 줄, 어떤 방식으로 붙여도 유지됨)이고, `hr`은 마크다운 가로선(`---`)인데 LinkedIn에 붙이면 글자 `---`로 들어오는 경우가 있었습니다. `subtitle_level`은 날짜 줄의 크기로, 기본 0은 굵은 글씨(붙인 뒤 편집기에서 부제목 스타일을 한 번 지정), 2는 `##` 헤딩입니다.
 
 ## 기존 방식
 

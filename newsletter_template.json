@@ -46,7 +46,7 @@
       "between_papers",
       "before_footer"
     ],
-    "divider_style": "hr",
-    "subtitle_level": 2
+    "divider_style": "line",
+    "subtitle_level": 0
   }
 }
