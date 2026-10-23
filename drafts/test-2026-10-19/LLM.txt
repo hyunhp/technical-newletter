@@ -1,11 +1,14 @@
-﻿Start Your Week Informed — Explore 3 Key Papers Driving the Future of LLMs and Generative AI!
+﻿Start Your Week Informed — Explore 6 Key Papers Driving the Future of LLMs and Generative AI!
 
-On CPUs, speculative decoding loses speed to bookkeeping. One runtime claims 1.35× over llama.cpp by cutting it.
+Agent memory forgets almost nothing you ask it to, and it narrows what you see
 Stay ahead with insights that matter.
 
-(1) Accelerating CPU Speculative Decoding via Unified Graph Execution and Transactional KV Isolation
-(2) Learning Checklists to Reduce Lottery Effects in Scientific Peer Review
-(3) Beyond source attribution: Address authorship and comparability decisions in an LLM -built scholarly knowledge graph
+(1) Can Agents Forget When Asked? A Benchmark for Memory Unlearning in LLM Agents
+(2) MemCut: Every Secret Leaves a Trail in the Long-Term Memory of LLM Agents
+(3) MemBubble: Benchmarking How Agent Memory Shapes LLM Response Diversity
+(4) Understanding KV Residency in Production-Scale Agentic LLM Workloads
+(5) The Window Is in the Reasoning: When LLM Agents Decide to Follow Prompt Injections
+(6) How Effectively Do Security Skills Guide Coding Agents in Vulnerability Detection in Linux Kernel?
 
 #LLMResearch #GenAI #AIInnovation #ResearchDigest #WeeklyUpdate
 
@@ -14,34 +17,46 @@ Stay ahead with insights that matter.
 📰 LLM Research Weekly Papers | 4th Week of October 2026
 Top Papers in Large Language Models (12 October - 18 October)
 
-Speculative decoding is meant to be a free speedup. On a CPU, much of that speedup goes to housekeeping: switching between the draft and target models, and allocating memory every time rejected tokens are rolled back out of the KV cache.
+Researchers sent 135 forget requests to six mainstream agent memory systems. No system fully passed more than 1.5% of them, and most passed none.
 
 🔎 What happened
-SubTernary is a CPU execution framework aimed at that overhead. It compiles the draft and target models into one memory arena served by a persistent thread pool, so there's no context swap between two graphs. Speculative tokens go to a static scratchpad. Rolling one back is a zero-copy pointer reset, with no reallocation and no thread synchronization, and the authors report O(1) rollback latency. A 256-bit AVX2 ternary SIMD kernel is included as a low-bit case study. Headline numbers: 1.35× faster than llama.cpp's speculative decoding and 3.99× faster than plain autoregressive decoding. The ablation is the interesting part. The systems runtime drives 35.0% of the throughput gains and the ternary kernel adds only 6.0%. Most of the win comes from memory and scheduling discipline, not clever math.
+Three new benchmarks tested what long-term agent memory does besides recall. Bemula pairs each of 50 multi-session dialogues with a control version, so a system only gets credit for forgetting something it actually stored. Across six memory systems and three backbone LLMs, the requested facts either stayed extractable under simple attacks, or the system deleted far more than it was asked to. MemCut follows 456 secrets through evidence trails, including messages that never state the secret outright. Removing the original disclosure cut recovery through normal retrieval much more than it cut recovery from the leftover stored objects. Even LLM-guided deletion left 39-76% residual recovery. MemBubble, built on preferences from real conversations, found that memory lowers response entropy by 34.7% on average compared with giving the model the full interaction history. Simple user-side fixes did not close that gap.
 
 🛠 Why it matters
-If you ship local or on-prem inference on CPUs, such as laptops, edge boxes or cheap servers without GPUs, this says the runtime may be leaving speed on the table even when you already use speculative decoding in llama.cpp. You don't need exotic low-bit kernels to get most of it. Pre-allocated arenas, persistent threads and cheap KV rollback did most of the work. Benchmark your own stack on rollback cost and draft/target switching before you buy hardware or chase quantization formats.
+If you ship a memory feature with a "forget this" button, assume the button deletes the obvious record and nothing else. MemCut shows that a secret can be pieced back together from nearby turns that hint at it. Your privacy promises, data-deletion workflows and compliance answers should describe what deletion really does. Bemula shows over-deletion is the other way it fails, so a heavier delete is not a free fix. Separately, if your product suggests options or information, memory can quietly narrow what users get offered. Measure diversity before and after you turn memory on.
 
 🌱 In plain words
-Picture a head chef and an apprentice sharing a kitchen. The apprentice preps dishes quickly and the chef approves or bins them. In the old setup they swap workstations for every dish, and each rejected dish means scrubbing and re-laying the counter. SubTernary gives them one shared counter and a tray for drafts. A rejected dish just gets tipped off the tray. The cooking itself stays the same. The time spent shuffling around disappears.
+Picture an assistant who takes notes on sticky pads. You ask them to forget your home address. They throw away the note that says "address", but other notes still read "lives near the blue bakery" and "walks 5 minutes to the station". Anyone reading the pile can still work it out. And because the notes keep saying "likes Italian", every dinner suggestion turns into pasta. That is what these benchmarks found: deletion leaves a trail, and memory narrows the choices you're offered.
 
 ⚠️ Reality check
-The abstract doesn't name the models, the CPUs, draft acceptance rates or batch sizes, and all of these change how much speculative decoding helps. Everything also rests on AVX2, so it's unclear whether the gains carry over to ARM or Apple silicon.
+These are research benchmarks with hand-designed secrets and set attack methods, and the abstracts do not name which commercial memory products were tested or how they perform in live use. Lower entropy is one way to measure diversity, and it doesn't directly tell you whether users ended up worse informed.
 
 💭 Editor's Take
-The number that matters is the 1.35× over llama.cpp, not the 3.99× over autoregressive decoding. And the real lesson is that runtime plumbing beats low-bit kernels: 35.0% of the gains versus 6.0%. I'd treat ternary as a sideshow here. I'll believe the plumbing story is general once someone shows it holding across several draft/target pairs and at least one non-x86 CPU. If the ideas get merged into llama.cpp itself, that settles it.
+The bigger problem is architectural, not a quality gap. Today's memory systems pull facts out of conversations and spread them across many stored objects, and none of them tracks where each fact came from, so "delete" has nothing exact to point at. I'll believe a memory system can forget when one passes Bemula's extraction-attack suite while still keeping unrelated memories intact. Until then, treat memory opt-in as permanent disclosure and tell users that plainly.
 
-**(1) Accelerating CPU Speculative Decoding via Unified Graph Execution and Transactional KV Isolation** – Lead paper: a CPU runtime (unified graph caching plus transactional KV isolation) that cuts speculative decoding overhead and reports 1.35× over llama.cpp speculative decoding and 3.99× over autoregressive decoding.
+**(1) Can Agents Forget When Asked? A Benchmark for Memory Unlearning in LLM Agents** – Lead: the first benchmark built for memory unlearning, finding that no tested system passes more than 1.5% of forget requests from start to finish.
 
-Read More : https://arxiv.org/abs/2610.28671
+Read More : https://arxiv.org/abs/2610.18052
 
-**(2) Learning Checklists to Reduce Lottery Effects in Scientific Peer Review** – Also notable: learns checklists from historical reviews to reduce 'reviewer lottery' error in scientific peer review.
+**(2) MemCut: Every Secret Leaves a Trail in the Long-Term Memory of LLM Agents** – Shows why deletion fails: secrets can be rebuilt from leftover evidence, with 39-76% residual recovery even after LLM-guided deletion.
 
-Read More : https://arxiv.org/abs/2610.28666
+Read More : https://arxiv.org/abs/2610.21405
 
-**(3) Beyond source attribution: Address authorship and comparability decisions in an LLM -built scholarly knowledge graph** – Also notable: looks at how LLM-built knowledge graphs can quietly turn a retrieval address into the only classification, using Sinitic dialects as the case.
+**(3) MemBubble: Benchmarking How Agent Memory Shapes LLM Response Diversity** – Adds a second cost of memory: responses lose 34.7% entropy on average compared with using the full history, and simple user-side fixes don't help.
 
-Read More : https://arxiv.org/abs/2610.28663
+Read More : https://arxiv.org/abs/2610.25127
+
+**(4) Understanding KV Residency in Production-Scale Agentic LLM Workloads** – Looks at four production Microsoft M365 agent workload traces to see how much GPU memory it takes to keep agent context's KV state around for reuse.
+
+Read More : https://arxiv.org/abs/2610.22863
+
+**(5) The Window Is in the Reasoning: When LLM Agents Decide to Follow Prompt Injections** – Uses branching rollouts to test whether an agent decides to follow a prompt injection at the moment it reads it, an assumption that runtime monitors and single-run benchmarks both rely on.
+
+Read More : https://arxiv.org/abs/2610.24048
+
+**(6) How Effectively Do Security Skills Guide Coding Agents in Vulnerability Detection in Linux Kernel?** – A large-scale study of 37 security skills used with Claude Code to find real Linux kernel vulnerabilities, including why the agent fails.
+
+Read More : https://arxiv.org/abs/2610.25705
 
 🔖 If this newsletter helps your learning, you may like cert-bank too: free AWS and Palantir certification practice with explanations. https://hyunhp.github.io/cert-bank/
 
