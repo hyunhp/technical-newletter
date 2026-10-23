@@ -37,3 +37,4 @@ wheel==0.44.0
 feedparser==6.0.12
 anthropic
 pandas
+beautifulsoup4
